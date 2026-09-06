@@ -7,8 +7,9 @@ end
 local fluentSrc = safeGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua")
 if not fluentSrc or #fluentSrc < 100 then fluentSrc = safeGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/src/library.lua") end
 local Fluent = loadstring(fluentSrc)()
-local SaveManager = loadstring(safeGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-local InterfaceManager = loadstring(safeGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+local SaveManager, InterfaceManager
+pcall(function() SaveManager = loadstring(safeGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))() end)
+pcall(function() InterfaceManager = loadstring(safeGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))() end)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -347,16 +348,20 @@ Tabs.Settings:AddDropdown("Language",{Title="Language",Values={"EN","UA","BY","K
     applyLang(code)
 end})
 
-InterfaceManager:SetLibrary(Fluent)
-SaveManager:SetLibrary(Fluent)
-SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes({})
-InterfaceManager:SetFolder("MoonHub")
-SaveManager:SetFolder("MoonHub/config")
-SaveManager:BuildConfigSection(Tabs.Settings)
-InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-Window:SelectTab(1)
-SaveManager:LoadAutoloadConfig()
+pcall(function()
+    if InterfaceManager and SaveManager then
+        InterfaceManager:SetLibrary(Fluent)
+        SaveManager:SetLibrary(Fluent)
+        SaveManager:IgnoreThemeSettings()
+        SaveManager:SetIgnoreIndexes({})
+        InterfaceManager:SetFolder("MoonHub")
+        SaveManager:SetFolder("MoonHub/config")
+        SaveManager:BuildConfigSection(Tabs.Settings)
+        InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+        SaveManager:LoadAutoloadConfig()
+    end
+end)
+pcall(function() Window:SelectTab(1) end)
 RunService.RenderStepped:Connect(function()
     if speedEnabled then local h=getHumanoid() if h then h.WalkSpeed=speedValue end end
     if spectateEnabled then local t=getClosest() if t and t.Parent and t.Parent:FindFirstChildOfClass("Humanoid") then Camera.CameraSubject=t.Parent:FindFirstChildOfClass("Humanoid") end end
