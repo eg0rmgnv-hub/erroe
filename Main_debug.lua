@@ -1,0 +1,15 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua", true))()
+local Window = Fluent:CreateWindow({ Title = "MoonHub DEBUG", SubTitle = "Solara/XENO", TabWidth = 160, Size = UDim2.fromOffset(500, 300), Acrylic = false, Theme = "Dark", MinimizeKey = Enum.KeyCode.LeftControl })
+local function safeAdd(tab, fn, name)
+    local ok, err = pcall(fn)
+    if not ok then warn("DEBUG FAIL "..name..": "..tostring(err)) Fluent:Notify({Title="DEBUG", Content=name.." failed: "..tostring(err), Duration=5}) else print("DEBUG OK "..name) end
+end
+local Tab = Window:AddTab({ Title = "Test", Icon = "bug" })
+safeAdd(Tab, function() Tab:AddParagraph({ Title = "Paragraph", Content = "If you see this, Fluent base works" }) end, "Paragraph")
+safeAdd(Tab, function() Tab:AddButton({ Title = "Button", Callback = function() print("btn") end }) end, "Button")
+safeAdd(Tab, function() Tab:AddToggle("TestToggle", { Title = "Toggle", Default = false, Callback = function(v) print(v) end }) end, "Toggle")
+safeAdd(Tab, function() Tab:AddSlider("TestSlider", { Title = "Slider", Default = 50, Min = 0, Max = 100, Rounding = 0, Callback = function(v) print(v) end }) end, "Slider")
+safeAdd(Tab, function() Tab:AddDropdown("TestDropdown", { Title = "Dropdown", Values = {"A","B","C"}, Default = 1, Callback = function(v) print(v) end }) end, "Dropdown")
+safeAdd(Tab, function() Tab:AddInput("TestInput", { Title = "Input", Default = "", Placeholder = "test", Callback = function(v) print(v) end }) end, "Input")
+safeAdd(Tab, function() Tab:AddColorpicker("TestColor", { Title = "Color", Default = Color3.fromRGB(255,0,0) }) end, "Colorpicker")
+Fluent:Notify({ Title = "DEBUG", Content = "All components tested, check F9", Duration = 5 })
