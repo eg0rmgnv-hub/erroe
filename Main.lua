@@ -1,6 +1,14 @@
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+local function safeGet(url)
+    local ok, res = pcall(function() return game:HttpGet(url, true) end)
+    if ok and res and #res > 100 then return res end
+    local ok2, res2 = pcall(function() return game:HttpGet(url) end)
+    return ok2 and res2 or nil
+end
+local fluentSrc = safeGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua")
+if not fluentSrc or #fluentSrc < 100 then fluentSrc = safeGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/src/library.lua") end
+local Fluent = loadstring(fluentSrc)()
+local SaveManager = loadstring(safeGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(safeGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")

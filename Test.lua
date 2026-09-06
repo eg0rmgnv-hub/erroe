@@ -1,0 +1,6 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua", true))()
+local Window = Fluent:CreateWindow({ Title = "Test", SubTitle = "XENO Check", TabWidth = 160, Size = UDim2.fromOffset(400, 200), Acrylic = false, Theme = "Dark", MinimizeKey = Enum.KeyCode.LeftControl })
+local Tab = Window:AddTab({ Title = "Main", Icon = "check" })
+Tab:AddParagraph({ Title = "XENO Working", Content = "If you see this, Fluent works on XENO" })
+Tab:AddButton({ Title = "Close", Callback = function() print("XENO OK") end })
+Fluent:Notify({ Title = "Test", Content = "Fluent loaded", Duration = 4 })
