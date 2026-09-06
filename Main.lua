@@ -1,3 +1,16 @@
+getgenv = getgenv or function() return _G end
+gethui = gethui or function() return game.CoreGui end
+protectgui = protectgui or function(g) return g end
+isfile = isfile or function() return false end
+isdir = isdir or isfolder or function() return false end
+makefolder = makefolder or function() return end
+writefile = writefile or function() return end
+readfile = readfile or function() return "" end
+listfiles = listfiles or function() return {} end
+getcustomasset = getcustomasset or getCustomAsset or function(p) return p end
+Drawing = Drawing or nil
+mousemoverel = mousemoverel or mousemove or function() end
+setclipboard = setclipboard or setClipboard or function() end
 local function safeGet(url)
     local ok, res = pcall(function() return game:HttpGet(url, true) end)
     if ok and res and #res > 100 then return res end
