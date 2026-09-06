@@ -35,30 +35,6 @@ local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
-local T = {
-    en = {Movement="Movement",Visuals="Visuals",Combat="Combat",Player="Player",Utility="Utility",Troll="Troll",Settings="Settings",Loaded="Loaded successfully",Fling="Fling Player",Orbit="Orbit Player",Attach="Attach to Player",View="View Player"},
-    uk = {Movement="Рух",Visuals="Візуали",Combat="Бій",Player="Гравець",Utility="Утиліти",Troll="Троль",Settings="Налаштування",Loaded="Успішно завантажено",Fling="Кидок гравця",Orbit="Орбіта",Attach="Прикріпитись",View="Стежити"},
-    be = {Movement="Рух",Visuals="Візуал",Combat="Бой",Player="Гулец",Utility="Утыліты",Troll="Троль",Settings="Налады",Loaded="Паспяхова загружана",Fling="Кінуць гульца",Orbit="Арбіта",Attach="Прымацавацца",View="Сачыць"},
-    kk = {Movement="Қозғалыс",Visuals="Визуал",Combat="Ұрыс",Player="Ойыншы",Utility="Құралдар",Troll="Тролль",Settings="Баптаулар",Loaded="Сәтті жүктелді",Fling="Ойыншыны лақтыру",Orbit="Айналдыру",Attach="Жабысу",View="Бақылау"}
-}
-local curLang = "en"
-local function tr(k) local d=T[curLang] return d and d[k] or k end
-local function applyLang(lang)
-    curLang=lang
-    pcall(function()
-        for _,v in ipairs(game.CoreGui:GetDescendants()) do
-            if v:IsA("TextLabel") or v:IsA("TextButton") then
-                v.Font = Enum.Font.GothamBold
-                for k,enVal in pairs(T.en) do
-                    if v.Text==enVal then v.Text=T[lang][k] end
-                    for _,other in pairs(T) do if v.Text==other[k] then v.Text=T[lang][k] end end
-                end
-            end
-        end
-    end)
-    Fluent:Notify({Title="MoonHub",Content=(T[lang] and T[lang].Loaded or "Loaded").." ["..lang.."]",Duration=3})
-end
-
 local Window = Fluent:CreateWindow({
     Title = "MoonHub",
     SubTitle = "Universal  v1.2  //  Amethyst",
@@ -68,43 +44,17 @@ local Window = Fluent:CreateWindow({
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl
 })
-task.spawn(function()
-    pcall(function()
-        task.wait(0.4)
-        Fluent:Notify({Title="MoonHub",Content="Amethyst palette active",Duration=2})
-    end)
-end)
-
-task.defer(function()
-    task.wait(0.7)
-    pcall(function()
-        for _,v in ipairs(game.CoreGui:GetDescendants()) do
-            if v:IsA("TextLabel") or v:IsA("TextButton") then
-                v.Font = Enum.Font.GothamBold
-            end
-            if v:IsA("Frame") and v.Name=="Main" then
-                local s=Instance.new("UIStroke")
-                s.Color=Color3.fromRGB(168,85,247)
-                s.Thickness=1.2
-                s.Transparency=0.55
-                s.ApplyStrokeMode=Enum.ApplyStrokeMode.Border
-                s.Parent=v
-            end
-        end
-    end)
-end)
-
 local Tabs = {
-    Movement = Window:AddTab({ Title = tr("Movement"), Icon = "move" }),
-    Visuals = Window:AddTab({ Title = tr("Visuals"), Icon = "eye" }),
-    Combat = Window:AddTab({ Title = tr("Combat"), Icon = "crosshair" }),
-    Player = Window:AddTab({ Title = tr("Player"), Icon = "user" }),
-    Utility = Window:AddTab({ Title = tr("Utility"), Icon = "compass" }),
-    Troll = Window:AddTab({ Title = tr("Troll"), Icon = "smile" }),
-    Settings = Window:AddTab({ Title = tr("Settings"), Icon = "settings" })
+    Movement = Window:AddTab({ Title = "Movement", Icon = "move" }),
+    Visuals = Window:AddTab({ Title = "Visuals", Icon = "eye" }),
+    Combat = Window:AddTab({ Title = "Combat", Icon = "crosshair" }),
+    Player = Window:AddTab({ Title = "Player", Icon = "user" }),
+    Utility = Window:AddTab({ Title = "Utility", Icon = "compass" }),
+    Troll = Window:AddTab({ Title = "Troll", Icon = "smile" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 local Options = Fluent.Options
-Fluent:Notify({ Title = "MoonHub", Content = tr("Loaded"), Duration = 4 })
+Fluent:Notify({ Title = "MoonHub", Content = "Loaded successfully", Duration = 4 })
 
 local function getCharacter() return LocalPlayer.Character end
 local function getHumanoid() local c=getCharacter() return c and c:FindFirstChildOfClass("Humanoid") end
@@ -355,11 +305,7 @@ Tabs.Utility:AddButton({Title="FPS Boost",Callback=function() for _,v in ipairs(
 ------------------------------------------------
 -- SETTINGS
 ------------------------------------------------
-Tabs.Settings:AddDropdown("Language",{Title="Language",Values={"EN","UA","BY","KZ"},Default=1,Callback=function(v)
-    local map={EN="en",UA="uk",BY="be",KZ="kk"}
-    local code=map[v] or "en"
-    applyLang(code)
-end})
+Tabs.Settings:AddDropdown("Language",{Title="Language",Values={"EN","UA","BY","KZ"},Default=1,Callback=function(v) Fluent:Notify({Title="Language",Content="Selected: "..v.." (restart to apply)",Duration=2}) end})
 
 pcall(function() Window:SelectTab(1) end)
 RunService.RenderStepped:Connect(function()
