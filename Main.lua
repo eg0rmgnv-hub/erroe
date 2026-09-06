@@ -191,8 +191,8 @@ local wallCheck=true
 local aimPart="Head"
 local fovRadius=160
 local showFOV=true
-local fovCircle
-if Drawing then fovCircle=Drawing.new("Circle") fovCircle.Color=Color3.fromRGB(168,85,247) fovCircle.Thickness=1.2 fovCircle.NumSides=64 fovCircle.Filled=false fovCircle.Transparency=0.9 fovCircle.Visible=false end
+local fovCircle = nil
+-- if Drawing then fovCircle=Drawing.new("Circle") fovCircle.Color=Color3.fromRGB(168,85,247) fovCircle.Thickness=1.2 fovCircle.NumSides=64 fovCircle.Filled=false fovCircle.Transparency=0.9 fovCircle.Visible=false end
 local function isVisible(part) if not wallCheck then return true end local rayParams=RaycastParams.new() rayParams.FilterDescendantsInstances={LocalPlayer.Character,Camera} rayParams.FilterType=Enum.RaycastFilterType.Exclude local origin=Camera.CFrame.Position local dir=part.Position-origin local result=Workspace:Raycast(origin,dir,rayParams) return result==nil or result.Instance:IsDescendantOf(part.Parent) end
 local function getClosest()
     local closest,dist=nil,fovRadius
@@ -309,11 +309,8 @@ Tabs.Settings:AddDropdown("Language",{Title="Language",Values={"EN","UA","BY","K
 
 pcall(function() Window:SelectTab(1) end)
 RunService.RenderStepped:Connect(function()
-    if speedEnabled then local h=getHumanoid() if h then h.WalkSpeed=speedValue end end
-    if spectateEnabled then local t=getClosest() if t and t.Parent and t.Parent:FindFirstChildOfClass("Humanoid") then Camera.CameraSubject=t.Parent:FindFirstChildOfClass("Humanoid") end end
-    if fovCircle then fovCircle.Visible=showFOV and aimEnabled fovCircle.Position=Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y/2) fovCircle.Radius=fovRadius end
-    if aimEnabled and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then local target=getClosest() if target then local pos,onScreen=Camera:WorldToViewportPoint(target.Position) if onScreen then local center=Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y/2) local delta=Vector2.new(pos.X,pos.Y)-center if mousemoverel then mousemoverel(delta.X,delta.Y) end end end end
-    updateESP()
+    if speedEnabled then local h=getHumanoid() if h then pcall(function() h.WalkSpeed=speedValue end) end end
+    -- spectate/FOV/ESP disabled for Solara debug
 end)
 LocalPlayer.Idled:Connect(function() if antiAFK then VirtualUser:CaptureController() VirtualUser:ClickButton2(Vector2.new()) end end)
 Fluent:Notify({Title="MoonHub",Content="Amethyst theme  •  Bold text  •  LeftControl to hide",Duration=5})
