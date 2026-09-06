@@ -361,19 +361,6 @@ Tabs.Settings:AddDropdown("Language",{Title="Language",Values={"EN","UA","BY","K
     applyLang(code)
 end})
 
-pcall(function()
-    if InterfaceManager and SaveManager then
-        InterfaceManager:SetLibrary(Fluent)
-        SaveManager:SetLibrary(Fluent)
-        SaveManager:IgnoreThemeSettings()
-        SaveManager:SetIgnoreIndexes({})
-        InterfaceManager:SetFolder("MoonHub")
-        SaveManager:SetFolder("MoonHub/config")
-        SaveManager:BuildConfigSection(Tabs.Settings)
-        InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-        SaveManager:LoadAutoloadConfig()
-    end
-end)
 pcall(function() Window:SelectTab(1) end)
 RunService.RenderStepped:Connect(function()
     if speedEnabled then local h=getHumanoid() if h then h.WalkSpeed=speedValue end end
