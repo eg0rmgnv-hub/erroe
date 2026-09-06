@@ -121,7 +121,7 @@ local espNames=true
 local espHealth=true
 local espDistance=false
 local tracerEnabled=false
-local espFolder=Instance.new("Folder") espFolder.Name="MoonHub_ESP" espFolder.Parent=game.CoreGui
+local espFolder=Instance.new("Folder") espFolder.Name="MoonHub_ESP" pcall(function() espFolder.Parent = gethui and gethui() or game.CoreGui end) if not espFolder.Parent then espFolder.Parent = game:GetService("CoreGui") end
 local highlights={},billboards={},tracerLines={}
 local function clearESP(plr) if highlights[plr] then highlights[plr]:Destroy() highlights[plr]=nil end if billboards[plr] then billboards[plr]:Destroy() billboards[plr]=nil end if tracerLines[plr] then pcall(function() tracerLines[plr]:Remove() end) tracerLines[plr]=nil end end
 local function createESP(plr)
