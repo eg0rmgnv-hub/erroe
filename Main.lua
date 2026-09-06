@@ -24,6 +24,18 @@ local SaveManager, InterfaceManager
 pcall(function() SaveManager = loadstring(safeGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))() end)
 pcall(function() InterfaceManager = loadstring(safeGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))() end)
 
+local logoAsset = nil
+pcall(function()
+    if writefile and isfile and getcustomasset then
+        if not isfile("MoonHub_logo.png") then
+            pcall(function()
+                local ok, data = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/eg0rmgnv-hub/MoonHub/main/logo.png", true) end)
+                if ok and data and #data > 100 then writefile("MoonHub_logo.png", data) end
+            end)
+        end
+        if isfile("MoonHub_logo.png") then logoAsset = getcustomasset("MoonHub_logo.png") end
+    end
+end)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -37,20 +49,45 @@ local Camera = Workspace.CurrentCamera
 
 local Window = Fluent:CreateWindow({
     Title = "MoonHub",
-    SubTitle = "Universal  v1.2  //  Amethyst",
+    SubTitle = "Universal  v1.1  //  Logo",
     TabWidth = 160,
     Size = UDim2.fromOffset(640, 540),
     Acrylic = false,
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl
 })
+task.defer(function()
+    task.wait(0.7)
+    pcall(function()
+        for _,v in ipairs(game.CoreGui:GetDescendants()) do
+            if v:IsA("TextLabel") and v.Text=="MoonHub" and v.Parent and v.Parent:IsA("Frame") then
+                if logoAsset and not v.Parent:FindFirstChild("MoonLogo") then
+                    local img = Instance.new("ImageLabel")
+                    img.Name = "MoonLogo"
+                    img.Size = UDim2.fromOffset(24, 24)
+                    img.Position = UDim2.new(0, -28, 0.5, -12)
+                    img.BackgroundTransparency = 1
+                    img.Image = logoAsset
+                    img.Parent = v.Parent
+                end
+            end
+            if v:IsA("Frame") and v.Name=="Main" then
+                local s = Instance.new("UIStroke")
+                s.Color = Color3.fromRGB(168,85,247)
+                s.Thickness = 1.1
+                s.Transparency = 0.6
+                s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+                s.Parent = v
+            end
+        end
+    end)
+end)
 local Tabs = {
     Movement = Window:AddTab({ Title = "Movement", Icon = "move" }),
     Visuals = Window:AddTab({ Title = "Visuals", Icon = "eye" }),
     Combat = Window:AddTab({ Title = "Combat", Icon = "crosshair" }),
     Player = Window:AddTab({ Title = "Player", Icon = "user" }),
     Utility = Window:AddTab({ Title = "Utility", Icon = "compass" }),
-    Troll = Window:AddTab({ Title = "Troll", Icon = "smile" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 local Options = Fluent.Options
@@ -191,8 +228,8 @@ local wallCheck=true
 local aimPart="Head"
 local fovRadius=160
 local showFOV=true
-local fovCircle = nil
--- if Drawing then fovCircle=Drawing.new("Circle") fovCircle.Color=Color3.fromRGB(168,85,247) fovCircle.Thickness=1.2 fovCircle.NumSides=64 fovCircle.Filled=false fovCircle.Transparency=0.9 fovCircle.Visible=false end
+local fovCircle
+if Drawing and Drawing.new then pcall(function() fovCircle=Drawing.new("Circle") fovCircle.Color=Color3.fromRGB(168,85,247) fovCircle.Thickness=1.2 fovCircle.NumSides=64 fovCircle.Filled=false fovCircle.Transparency=0.9 fovCircle.Visible=false end) end
 local function isVisible(part) if not wallCheck then return true end local rayParams=RaycastParams.new() rayParams.FilterDescendantsInstances={LocalPlayer.Character,Camera} rayParams.FilterType=Enum.RaycastFilterType.Exclude local origin=Camera.CFrame.Position local dir=part.Position-origin local result=Workspace:Raycast(origin,dir,rayParams) return result==nil or result.Instance:IsDescendantOf(part.Parent) end
 local function getClosest()
     local closest,dist=nil,fovRadius
@@ -224,69 +261,6 @@ local spectateEnabled=false
 Tabs.Player:AddToggle("Spectate",{Title="Spectate Closest",Default=false,Callback=function(v) spectateEnabled=v if not v then Camera.CameraSubject=getHumanoid() end end})
 
 ------------------------------------------------
--- TROLL
-------------------------------------------------
-local flingPower=500
-local flingConn=nil
-local flingTarget=nil
-local orbitEnabled=false
-local orbitConn=nil
-local orbitSpeed=3
-local attachEnabled=false
-local attachConn=nil
-
-local function flingPlayer(plr)
-    local c=getCharacter() local root=getRoot() if not c or not root then return end
-    local targetChar=plr and plr.Character local targetRoot=targetChar and targetChar:FindFirstChild("HumanoidRootPart") if not targetRoot then Fluent:Notify({Title="Fling",Content="Target not found",Duration=2}) return end
-    flingTarget=plr
-    Fluent:Notify({Title="Fling",Content="Flinging "..plr.Name,Duration=3})
-    if flingConn then flingConn:Disconnect() end
-    local bv=Instance.new("BodyAngularVelocity") bv.Name="MoonFling" bv.MaxTorque=Vector3.new(9e9,9e9,9e9) bv.AngularVelocity=Vector3.new(0,flingPower,0) bv.P=9e4 bv.Parent=root
-    local start=Workspace.DistributedGameTime
-    flingConn=RunService.Heartbeat:Connect(function()
-        if not flingTarget or not flingTarget.Character or not flingTarget.Character:FindFirstChild("HumanoidRootPart") then if bv then bv:Destroy() end if flingConn then flingConn:Disconnect() flingConn=nil end return end
-        if Workspace.DistributedGameTime-start>3 then bv:Destroy() if flingConn then flingConn:Disconnect() flingConn=nil end return end
-        local tr=flingTarget.Character.HumanoidRootPart
-        root.CFrame=tr.CFrame * CFrame.new(0,0,1)
-        root.Velocity=Vector3.new(0,0,0)
-    end)
-    task.delay(3.5,function() if bv and bv.Parent then bv:Destroy() end root.Velocity=Vector3.new(0,0,0) end)
-end
-
-Tabs.Troll:AddInput("FlingPlayer",{Title="Fling Target",Placeholder="Username",Callback=function() end})
-Tabs.Troll:AddSlider("FlingPower",{Title="Fling Power",Default=500,Min=100,Max=2000,Rounding=0,Callback=function(v) flingPower=v end})
-Tabs.Troll:AddButton({Title="Fling Player",Callback=function() local p=findPlayer(Options.FlingPlayer.Value) if p then flingPlayer(p) end end})
-Tabs.Troll:AddButton({Title="Fling All",Callback=function() for _,p in ipairs(Players:GetPlayers()) do if p~=LocalPlayer then flingPlayer(p) task.wait(3.6) end end end})
-
-Tabs.Troll:AddToggle("Orbit",{Title="Orbit Player",Default=false,Callback=function(v)
-    orbitEnabled=v
-    if v then
-        local tgt=findPlayer(Options.FlingPlayer.Value) or getClosest() and getClosest().Parent and Players:GetPlayerFromCharacter(getClosest().Parent) or nil
-        if not tgt then Fluent:Notify({Title="Orbit",Content="No target",Duration=2}) return end
-        local angle=0
-        orbitConn=RunService.Heartbeat:Connect(function(dt)
-            local c=getCharacter() local r=getRoot() local tc=tgt.Character and tgt.Character:FindFirstChild("HumanoidRootPart") if not r or not tc then return end
-            angle+=dt*orbitSpeed
-            local offset=Vector3.new(math.cos(angle)*6,1,math.sin(angle)*6)
-            r.CFrame=CFrame.new(tc.Position+offset, tc.Position)
-        end)
-    else if orbitConn then orbitConn:Disconnect() orbitConn=nil end end
-end})
-Tabs.Troll:AddSlider("OrbitSpeed",{Title="Orbit Speed",Default=3,Min=1,Max=10,Rounding=1,Callback=function(v) orbitSpeed=v end})
-
-Tabs.Troll:AddToggle("Attach",{Title="Attach to Player",Default=false,Callback=function(v)
-    attachEnabled=v
-    if v then
-        local tgt=findPlayer(Options.FlingPlayer.Value)
-        if not tgt or not tgt.Character then Fluent:Notify({Title="Attach",Content="Target not found",Duration=2}) return end
-        attachConn=RunService.Heartbeat:Connect(function()
-            local r=getRoot() local tr=tgt.Character and tgt.Character:FindFirstChild("HumanoidRootPart") if r and tr then r.CFrame=tr.CFrame * CFrame.new(0,2,0) end
-        end)
-    else if attachConn then attachConn:Disconnect() attachConn=nil end end
-end})
-Tabs.Troll:AddButton({Title="Detach",Callback=function() attachEnabled=false if attachConn then attachConn:Disconnect() attachConn=nil end orbitEnabled=false if orbitConn then orbitConn:Disconnect() orbitConn=nil end if flingConn then flingConn:Disconnect() flingConn=nil end local bv=getRoot() and getRoot():FindFirstChild("MoonFling") if bv then bv:Destroy() end end})
-
-------------------------------------------------
 -- UTILITY
 ------------------------------------------------
 Tabs.Utility:AddSection("Teleport")
@@ -309,8 +283,13 @@ Tabs.Settings:AddDropdown("Language",{Title="Language",Values={"EN","UA","BY","K
 
 pcall(function() Window:SelectTab(1) end)
 RunService.RenderStepped:Connect(function()
-    if speedEnabled then local h=getHumanoid() if h then pcall(function() h.WalkSpeed=speedValue end) end end
-    -- spectate/FOV/ESP disabled for Solara debug
+    pcall(function()
+        if speedEnabled then local h=getHumanoid() if h then h.WalkSpeed=speedValue end end
+        if spectateEnabled then local t=getClosest() if t and t.Parent and t.Parent:FindFirstChildOfClass("Humanoid") then Camera.CameraSubject=t.Parent:FindFirstChildOfClass("Humanoid") end end
+        if fovCircle then fovCircle.Visible=showFOV and aimEnabled fovCircle.Position=Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y/2) fovCircle.Radius=fovRadius end
+        if aimEnabled and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then local target=getClosest() if target then local pos,onScreen=Camera:WorldToViewportPoint(target.Position) if onScreen then local center=Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y/2) local delta=Vector2.new(pos.X,pos.Y)-center if mousemoverel then mousemoverel(delta.X,delta.Y) end end end end
+        pcall(updateESP)
+    end)
 end)
 LocalPlayer.Idled:Connect(function() if antiAFK then VirtualUser:CaptureController() VirtualUser:ClickButton2(Vector2.new()) end end)
 Fluent:Notify({Title="MoonHub",Content="Amethyst theme  •  Bold text  •  LeftControl to hide",Duration=5})
